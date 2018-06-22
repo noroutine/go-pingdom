@@ -112,6 +112,27 @@ func (cs *CheckService) Update(id int, check Check) (*PingdomResponse, error) {
 	return m, err
 }
 
+// UpdateCheck will update the check represented by the given ID with the values
+// in the given check.  You should submit the complete list of values in
+// the given check parameter, not just those that have changed.
+func (cs *CheckService) Update(id int, check Check) (*PingdomResponse, error) {
+	if err := check.Valid(); err != nil {
+		return nil, err
+	}
+
+	req, err := cs.client.NewRequest("PUT", "/checks/"+strconv.Itoa(id), check.PutParams())
+	if err != nil {
+		return nil, err
+	}
+
+	m := &PingdomResponse{}
+	_, err = cs.client.Do(req, m)
+	if err != nil {
+		return nil, err
+	}
+	return m, err
+}
+
 // DeleteCheck will delete the check for the given ID.
 func (cs *CheckService) Delete(id int) (*PingdomResponse, error) {
 	req, err := cs.client.NewRequest("DELETE", "/checks/"+strconv.Itoa(id), nil)

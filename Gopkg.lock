@@ -14,6 +14,12 @@
   version = "v1.0.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/russellcardullo/go-pingdom"
+  packages = ["pingdom"]
+  revision = "3448ee0e92d39f82d5cb830d36ca2febf54672e2"
+
+[[projects]]
   name = "github.com/stretchr/testify"
   packages = ["assert"]
   revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
@@ -22,6 +28,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "dbc03d7c9dd4e54b6993c8ece59c3174becb58bd828e500cf8ad825e340278c4"
+  inputs-digest = "782363388642fe0853e59b5185074f2e79e327c502335d41e7a97a27d9e6a560"
   solver-name = "gps-cdcl"
   solver-version = 1

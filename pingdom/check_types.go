@@ -46,6 +46,24 @@ type PingCheck struct {
 	TeamIds                  []int  `json:"teamids,omitempty"`
 }
 
+// DNSCheck represents a Pingdom DNS check
+type DNSCheck struct {
+	Name                     string            `json:"name"`
+	Hostname                 string            `json:"hostname,omitempty"`
+	Resolution               int               `json:"resolution,omitempty"`
+	Paused                   bool              `json:"paused,omitempty"`
+	SendNotificationWhenDown int               `json:"sendnotificationwhendown,omitempty"`
+	NotifyAgainEvery         int               `json:"notifyagainevery,omitempty"`
+	NotifyWhenBackup         bool              `json:"notifywhenbackup,omitempty"`
+	IntegrationIds           []int             `json:"integrationids,omitempty"`
+	Tags                     string            `json:"tags,omitempty"`
+	ProbeFilters             string            `json:"probe_filters,omitempty"`
+	UserIds                  []int             `json:"userids,omitempty"`
+	TeamIds                  []int             `json:"teamids,omitempty"`
+	ExpectedIP               string            `json:"expectedip,omitempty"`
+	NameServer               string            `json:"nameserver,omitempty"`
+}
+
 // Params returns a map of parameters for an HttpCheck that can be sent along
 // with an HTTP PUT request
 func (ck *HttpCheck) PutParams() map[string]string {
@@ -194,4 +212,55 @@ func intListToCDString(integers []int) string {
 		}
 	}
 	return CDString
+}
+
+func (ck *DNSCheck) PutParams() map[string]string {
+	params := map[string]string{
+		"name":                     ck.Name,
+		"host":                     ck.Hostname,
+		"resolution":               strconv.Itoa(ck.Resolution),
+		"paused":                   strconv.FormatBool(ck.Paused),
+		"notifyagainevery":         strconv.Itoa(ck.NotifyAgainEvery),
+		"notifywhenbackup":         strconv.FormatBool(ck.NotifyWhenBackup),
+		"integrationids":           intListToCDString(ck.IntegrationIds),
+		"probe_filters":            ck.ProbeFilters,
+		"userids":                  intListToCDString(ck.UserIds),
+		"teamids":                  intListToCDString(ck.TeamIds),
+		"expectedip":               ck.ExpectedIP,
+		"nameserver":               ck.NameServer,
+	}
+
+	if ck.SendNotificationWhenDown != 0 {
+		params["sendnotificationwhendown"] = strconv.Itoa(ck.SendNotificationWhenDown)
+	}
+
+    for k, v := range params {
+        if v == "" {
+            delete(params, k)
+        }
+    }
+
+    return params
+}
+
+func (ck *DNSCheck) PostParams() map[string]string {
+	params := ck.PutParams()
+	params["type"] = "dns"
+	return params
+}
+
+func (ck *DNSCheck) Valid() error {
+	if ck.Name == "" {
+		return fmt.Errorf("Invalid value for `Name`.  Must contain non-empty string")
+	}
+
+	if ck.Hostname == "" {
+		return fmt.Errorf("Invalid value for `Hostname`.  Must contain non-empty string")
+	}
+
+	if ck.Resolution != 1 && ck.Resolution != 5 && ck.Resolution != 15 &&
+		ck.Resolution != 30 && ck.Resolution != 60 {
+		return fmt.Errorf("Invalid value %v for `Resolution`.  Allowed values are [1,5,15,30,60].", ck.Resolution)
+	}
+	return nil
 }

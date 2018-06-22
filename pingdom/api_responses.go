@@ -42,6 +42,7 @@ type CheckResponse struct {
 type CheckResponseType struct {
 	Name string                    `json:"-"`
 	HTTP *CheckResponseHTTPDetails `json:"http,omitempty"`
+	DNS  *CheckResponseDNSDetails  `json:"dns,omitempty"`
 }
 
 type CheckResponseTag struct {
@@ -130,6 +131,7 @@ func (c *CheckResponseType) UnmarshalJSON(b []byte) error {
 			return err
 		}
 		c.HTTP = rawCheckDetails.HTTP
+		c.DNS = rawCheckDetails.DNS
 	}
 	return nil
 }
@@ -145,6 +147,11 @@ type CheckResponseHTTPDetails struct {
 	ShouldNotContain string            `json:"shouldnotcontain,omitempty"`
 	PostData         string            `json:"postdata,omitempty"`
 	RequestHeaders   map[string]string `json:"requestheaders,omitempty"`
+}
+
+type CheckResponseDNSDetails struct {
+	NameServer       string            `json:"nameserver,omitempty"`
+	ExpectedIp       string            `json:"expectedip,omitempty"`
 }
 
 // Return string representation of the PingdomError
