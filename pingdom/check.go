@@ -112,15 +112,14 @@ func (cs *CheckService) Update(id int, check Check) (*PingdomResponse, error) {
 	return m, err
 }
 
-// UpdateCheck will update the check represented by the given ID with the values
-// in the given check.  You should submit the complete list of values in
-// the given check parameter, not just those that have changed.
-func (cs *CheckService) Update(id int, check Check) (*PingdomResponse, error) {
-	if err := check.Valid(); err != nil {
+// UpdateMultiple will update the checks represented by the given IDs with some values,
+// (like pause or resolution)
+func (cs *CheckService) UpdateMultiple(checks MultipleChecks) (*PingdomResponse, error) {
+	if err := checks.Valid(); err != nil {
 		return nil, err
 	}
 
-	req, err := cs.client.NewRequest("PUT", "/checks/"+strconv.Itoa(id), check.PutParams())
+	req, err := cs.client.NewRequest("PUT", "/checks", checks.PutParams())
 	if err != nil {
 		return nil, err
 	}

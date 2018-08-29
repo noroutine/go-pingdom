@@ -64,13 +64,19 @@ type DNSCheck struct {
 	NameServer               string            `json:"nameserver,omitempty"`
 }
 
+// MultipleChecks represents multiple checks for update
+type MultipleChecks struct {
+	Paused                  bool               `json:"paused,omitempty"`
+	Resolution              int                `json:"resolution,omitempty"`
+	CheckIds                []int              `json:"checkids,omitempty"`
+}
+
 // Params returns a map of parameters for an HttpCheck that can be sent along
 // with an HTTP PUT request
 func (ck *HttpCheck) PutParams() map[string]string {
 	m := map[string]string{
 		"name":             ck.Name,
 		"host":             ck.Hostname,
-		"resolution":       strconv.Itoa(ck.Resolution),
 		"paused":           strconv.FormatBool(ck.Paused),
 		"notifyagainevery": strconv.Itoa(ck.NotifyAgainEvery),
 		"notifywhenbackup": strconv.FormatBool(ck.NotifyWhenBackup),
@@ -100,6 +106,10 @@ func (ck *HttpCheck) PutParams() map[string]string {
 	} else {
 		m["shouldnotcontain"] = ck.ShouldNotContain
 	}
+
+    if ck.Resolution != 0 {
+        m["resolution"] = strconv.Itoa(ck.Resolution)
+    }
 
 	// Convert auth
 	if ck.Username != "" {
@@ -161,12 +171,10 @@ func (ck *HttpCheck) Valid() error {
 // Params returns a map of parameters for a PingCheck that can be sent along
 // with an HTTP PUT request
 func (ck *PingCheck) PutParams() map[string]string {
-	return map[string]string{
+	params := map[string]string{
 		"name":                     ck.Name,
 		"host":                     ck.Hostname,
-		"resolution":               strconv.Itoa(ck.Resolution),
 		"paused":                   strconv.FormatBool(ck.Paused),
-		"sendnotificationwhendown": strconv.Itoa(ck.SendNotificationWhenDown),
 		"notifyagainevery":         strconv.Itoa(ck.NotifyAgainEvery),
 		"notifywhenbackup":         strconv.FormatBool(ck.NotifyWhenBackup),
 		"integrationids":           intListToCDString(ck.IntegrationIds),
@@ -174,6 +182,16 @@ func (ck *PingCheck) PutParams() map[string]string {
 		"userids":                  intListToCDString(ck.UserIds),
 		"teamids":                  intListToCDString(ck.TeamIds),
 	}
+
+    if ck.Resolution != 0 {
+        params["resolution"] = strconv.Itoa(ck.Resolution)
+    }
+
+    if ck.SendNotificationWhenDown != 0 {
+        params["sendnotificationwhendown"] = strconv.Itoa(ck.SendNotificationWhenDown)
+    }
+
+	return params
 }
 
 // Params returns a map of parameters for a PingCheck that can be sent along
@@ -218,7 +236,6 @@ func (ck *DNSCheck) PutParams() map[string]string {
 	params := map[string]string{
 		"name":                     ck.Name,
 		"host":                     ck.Hostname,
-		"resolution":               strconv.Itoa(ck.Resolution),
 		"paused":                   strconv.FormatBool(ck.Paused),
 		"notifyagainevery":         strconv.Itoa(ck.NotifyAgainEvery),
 		"notifywhenbackup":         strconv.FormatBool(ck.NotifyWhenBackup),
@@ -229,6 +246,10 @@ func (ck *DNSCheck) PutParams() map[string]string {
 		"expectedip":               ck.ExpectedIP,
 		"nameserver":               ck.NameServer,
 	}
+
+    if ck.Resolution != 0 {
+        params["resolution"] = strconv.Itoa(ck.Resolution)
+    }
 
 	if ck.SendNotificationWhenDown != 0 {
 		params["sendnotificationwhendown"] = strconv.Itoa(ck.SendNotificationWhenDown)
@@ -262,5 +283,33 @@ func (ck *DNSCheck) Valid() error {
 		ck.Resolution != 30 && ck.Resolution != 60 {
 		return fmt.Errorf("Invalid value %v for `Resolution`.  Allowed values are [1,5,15,30,60].", ck.Resolution)
 	}
+	return nil
+}
+
+
+func (ck *MultipleChecks) PutParams() map[string]string {
+	params := map[string]string{
+		"paused":                   strconv.FormatBool(ck.Paused),
+		"checkids":                 intListToCDString(ck.CheckIds),
+	}
+
+	if ck.Resolution != 0 {
+	    params["resolution"] = strconv.Itoa(ck.Resolution)
+    }
+
+	for k, v := range params {
+		if v == "" {
+			delete(params, k)
+		}
+	}
+
+	return params
+}
+
+func (ck *MultipleChecks) PostParams() map[string]string {
+	return ck.PutParams()
+}
+
+func (ck *MultipleChecks) Valid() error {
 	return nil
 }
