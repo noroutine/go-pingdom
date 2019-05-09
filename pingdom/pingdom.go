@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 const (
@@ -32,7 +34,22 @@ type Client struct {
 func NewClient(user string, password string, key string) *Client {
 	baseURL, _ := url.Parse(defaultBaseURL)
 	c := &Client{User: user, Password: password, APIKey: key, BaseURL: baseURL}
-	c.client = http.DefaultClient
+	c.client = &http.Client{
+		Timeout: time.Second * 10,
+		Transport: &http.Transport{
+			DialContext: (&net.Dialer{
+				Timeout:   30 * time.Second,
+				//KeepAlive: 30 * time.Second,
+				KeepAlive: 0,
+				DualStack: true,
+			}).DialContext,
+			DisableKeepAlives:     true,
+			MaxIdleConns:          1,
+			IdleConnTimeout:       10 * time.Second,
+			TLSHandshakeTimeout:   10 * time.Second,
+			ExpectContinueTimeout: 1 * time.Second,
+		},
+	}
 	c.Checks = &CheckService{client: c}
 	c.Maintenances = &MaintenanceService{client: c}
 	c.Probes = &ProbeService{client: c}
