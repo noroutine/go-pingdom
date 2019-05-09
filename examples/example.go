@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/russellcardullo/go-pingdom/pingdom"
+	"github.com/noroutine/go-pingdom/pingdom"
 )
 
 func main() {

@@ -42,6 +42,8 @@ func (cs *MaintenanceService) List(params ...map[string]string) ([]MaintenanceRe
 	}
 	defer resp.Body.Close()
 
+	cs.client.RateLimits.UpdateFromResponse(resp)
+
 	if err := validateResponse(resp); err != nil {
 		return nil, err
 	}

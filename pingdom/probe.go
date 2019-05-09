@@ -27,6 +27,8 @@ func (cs *ProbeService) List(params ...map[string]string) ([]ProbeResponse, erro
 	}
 	defer resp.Body.Close()
 
+	cs.client.RateLimits.UpdateFromResponse(resp)
+
 	if err := validateResponse(resp); err != nil {
 		return nil, err
 	}
